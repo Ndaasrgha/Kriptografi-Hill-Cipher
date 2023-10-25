@@ -16,7 +16,8 @@ def enkripsi(pesan, kunci):
     pesan = pesan.upper()
     pesan_angka = [huruf_ke_angka(huruf) for huruf in pesan]
 
-    if len(pesan) % 2 != 0:
+    # Tambahkan 'X' jika panjang pesan ganjil
+    if len(pesan_angka) % 2 != 0:
         pesan_angka.append(huruf_ke_angka('X'))
 
     pesan_matriks = np.array(pesan_angka).reshape(-1, 2)
@@ -32,8 +33,10 @@ def dekripsi(pesan_terenkripsi, kunci):
     pesan_terdekripsi_matriks = np.array(pesan_terenkripsi_angka).reshape(-1, 2)
 
     # Matriks invers dari kunci
-    kunci_invers = np.linalg.inv(kunci)
-    kunci_invers = np.round(kunci_invers).astype(int)  # Bulatkan ke bilangan bulat
+    det_kunci = (kunci[0, 0] * kunci[1, 1] - kunci[0, 1] * kunci[1, 0]) % 26
+    det_inv = pow(int(det_kunci), -1, 26)  # Convert det_kunci to regular Python integer
+
+    kunci_invers = np.array([[kunci[1, 1], -kunci[0, 1]], [-kunci[1, 0], kunci[0, 0]]]) * det_inv % 26
 
     pesan_asli_angka = np.dot(pesan_terdekripsi_matriks, kunci_invers) % 26
 
@@ -41,16 +44,17 @@ def dekripsi(pesan_terenkripsi, kunci):
     pesan_asli = ''.join([angka_ke_huruf(angka) for angka in pesan_asli_angka.flatten()])
     return pesan_terdekripsi_matriks, pesan_asli
 
-#enkripsi
-pesan = "SARAGIH"
-pesan_matriks, pesan_terenkripsi, pesan_terenkripsi_teks = enkripsi(pesan, kunci)
+# Pesan yang akan dienkripsi
+plain_text = "AMANDA"
+
+# Enkripsi
+pesan_matriks, pesan_terenkripsi, pesan_terenkripsi_teks = enkripsi(plain_text, kunci)
 print("Pesan Matriks Terenkripsi:")
 print(pesan_matriks)
 print("Pesan Terenkripsi:", pesan_terenkripsi_teks)
 
-#dekripsi
-pesan_terenkripsi = "IGNNJG"
-pesan_terdekripsi_matriks, pesan_terdekripsi_teks = dekripsi(pesan_terenkripsi, kunci)
+# Dekripsi
+pesan_terdekripsi_matriks, pesan_terdekripsi_teks = dekripsi(pesan_terenkripsi_teks, kunci)
 print("Pesan Matriks Terdekripsi:")
 print(pesan_terdekripsi_matriks)
 print("Pesan Terdekripsi:", pesan_terdekripsi_teks)
